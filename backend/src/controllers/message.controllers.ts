@@ -48,14 +48,34 @@ export const getConversationHistory = async (req: Request, res: Response) => {
     _id: { $in: Array.from(uniqueUsers) },
   });
 
-  const formattedUsers = uniqueUsersList.map((user) => {
-    const userId = (user._id as ObjectId).toString();
-    return {
-      id: userId,
-      username: user.username,
-      unReadCount: unreadCounts[userId] || 0,
-    };
-  });
+  const formattedUsers = await Promise.all(
+    uniqueUsersList.map(async (user) => {
+      const userId = (user._id as ObjectId).toString();
+      const lastMessage = await Message.findOne({
+        $or: [
+          { sender: userId, receiver: req.id },
+          { sender: req.id, receiver: userId },
+        ],
+      })
+        .sort({ createdAt: -1 })
+        .select("message sender")
+        .populate("sender", "username _id");
+
+      const sender =
+        lastMessage?.sender._id.toString() === req.id.toString()
+          ? "You"
+          : // @ts-expect-error
+            lastMessage?.sender.username;
+      return {
+        id: userId,
+        username: user.username,
+        unReadCount: unreadCounts[userId] || 0,
+        lastMessageBy: sender,
+
+        lastMessage: lastMessage?.message || "",
+      };
+    })
+  );
 
   const pastUsers = formattedUsers.filter(
     (elem) => elem.id !== userId.toString()
