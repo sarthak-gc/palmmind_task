@@ -15,6 +15,17 @@ export const getConversationHistory = async (req: Request, res: Response) => {
 
   const unreadCounts: { [userId: string]: number } = {};
 
+  if (allMessages.length == 0) {
+    res.json({
+      status: "success",
+      data: {
+        uniqueUsersList: [],
+        totalMessageCount: 0,
+      },
+      message: "converstations retrieved",
+    });
+    return;
+  }
   allMessages.forEach((message) => {
     uniqueUsers.add(message.sender._id.toString());
     if (message.receiver) {

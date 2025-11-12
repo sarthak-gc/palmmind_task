@@ -78,3 +78,39 @@ export const me = async (req: Request, res: Response) => {
     id: req.id,
   });
 };
+
+export const searchUser = async (req: Request, res: Response) => {
+  const { u: username } = req.query;
+  if (typeof username !== "string") {
+    res.status(400).json({
+      status: "error",
+      message: "username required",
+    });
+    return;
+  }
+  if (!username || !username.trim()) {
+    res.status(400).json({
+      status: "error",
+      message: "username required",
+    });
+    return;
+  }
+  const users = await User.find({
+    username: { $regex: username, $options: "i" },
+  });
+  const updatedUsers = users.map((user) => ({
+    id: user._id,
+    username: user.username,
+  }));
+  if (users.length === 0) {
+    res.status(404).json({ message: "users not found" });
+    return;
+  }
+  res.json({
+    status: "success",
+    message: "Users retrieved",
+    data: {
+      users: updatedUsers,
+    },
+  });
+};

@@ -2,6 +2,7 @@ import express from "express";
 import {
   deleteUser,
   me,
+  searchUser,
   updateName,
   updatePassword,
 } from "../controllers/user.controllers.js";
@@ -14,5 +15,6 @@ router.put("/name", updateName);
 router.put("/password", updatePassword);
 router.delete("/me", deleteUser);
 router.get("/me", me);
+router.get("/search", searchUser);
 
 export default router;
