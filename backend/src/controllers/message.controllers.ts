@@ -49,11 +49,13 @@ export const getConversationHistory = async (req: Request, res: Response) => {
   const pastUsers = formattedUsers.filter(
     (elem) => elem.id !== userId.toString()
   );
+  const totalMessageCount = uniqueUsers.size - 1;
 
   res.json({
     status: "success",
     data: {
       uniqueUsersList: pastUsers,
+      totalMessageCount,
     },
     message: "converstations retrieved",
   });
