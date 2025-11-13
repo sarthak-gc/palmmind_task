@@ -102,10 +102,7 @@ export const searchUser = async (req: Request, res: Response) => {
     id: user._id,
     username: user.username,
   }));
-  if (users.length === 0) {
-    res.status(404).json({ message: "users not found" });
-    return;
-  }
+
   res.json({
     status: "success",
     message: "Users retrieved",

@@ -69,8 +69,7 @@ export const getConversationHistory = async (req: Request, res: Response) => {
       return {
         id: userId,
         username: user.username,
-        unReadCount: unreadCounts[userId] || 0,
-        lastMessageBy: sender,
+        unRead: unreadCounts[userId] > 0,
 
         lastMessage: lastMessage?.message || "",
       };

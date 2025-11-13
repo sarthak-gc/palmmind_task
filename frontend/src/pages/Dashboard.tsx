@@ -2,6 +2,7 @@ import { Sidebar, type User } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { axios } from "@/utils/axios";
+import { socket } from "@/utils/socket";
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 
@@ -10,6 +11,40 @@ export const Dashboard = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [searchName, setSearchName] = useState("");
   const [searchedUsers, setSearchedUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    socket.connect();
+    socket.emit("successful_login", { userId: localStorage.getItem("userId") });
+    socket.on("msg_sent", (data) => {
+      const { message, senderId } = data;
+
+      setUsers((prevUsers) => {
+        const exists = prevUsers.some((user) => user.id === senderId);
+
+        if (exists) {
+          return prevUsers.map((user) => {
+            return user.id === senderId
+              ? {
+                  ...user,
+                  lastMessage: message,
+                  unRead: true,
+                }
+              : user;
+          });
+        } else {
+          return [
+            {
+              id: senderId,
+              username: "someone",
+              unRead: true,
+              lastMessage: message,
+            },
+            ...prevUsers,
+          ];
+        }
+      });
+    });
+  }, [users]);
 
   useEffect(() => {
     const getConversations = async () => {
@@ -60,7 +95,7 @@ export const Dashboard = () => {
           </>
         )}
       </div>
-      <Outlet />
+      <Outlet context={{ socket }} />
     </div>
   );
 };
