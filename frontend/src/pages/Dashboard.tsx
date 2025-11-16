@@ -4,17 +4,23 @@ import { Input } from "@/components/ui/input";
 import { axios } from "@/utils/axios";
 import { socket } from "@/utils/socket";
 import { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
 export const Dashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchName, setSearchName] = useState("");
   const [searchedUsers, setSearchedUsers] = useState<User[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const data = {
+      userId: localStorage.getItem("userId"),
+      username: localStorage.getItem("username"),
+    };
     socket.connect();
-    socket.emit("successful_login", { userId: localStorage.getItem("userId") });
+    socket.emit("successful_login", { ...data });
+
     socket.on("msg_sent", (data) => {
       const { message, senderId } = data;
 
@@ -35,7 +41,7 @@ export const Dashboard = () => {
           return [
             {
               id: senderId,
-              username: "someone",
+              username: "New message",
               unRead: true,
               lastMessage: message,
             },
@@ -48,7 +54,12 @@ export const Dashboard = () => {
 
   useEffect(() => {
     const getConversations = async () => {
-      const res = await axios.get("/messages/conversations");
+      const token = localStorage.getItem("token");
+      const res = await axios.get("/messages/conversations", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = res.data;
       setUsers(data.data.uniqueUsersList);
       setLoading(false);
@@ -66,34 +77,54 @@ export const Dashboard = () => {
   return (
     <div className="w-screen h-screen flex bg-black">
       {loading && <div className="text-white text-center">Loading...</div>}
-      <div className="w-1/4  pt-4 border-r border-white ">
-        <div className="flex gap-3 mb-10 px-4">
-          <Input
-            className="placeholder:text-white/80 placeholder:font-bold text-white"
-            placeholder="search user"
-            onChange={(e) => {
-              setSearchName(e.target.value);
-            }}
-          />
+      <div className="w-1/4  pt-4 border-r border-white justify-between flex flex-col pb-10">
+        <div>
+          <div className="flex gap-3 mb-10 px-4">
+            <Input
+              className="placeholder:text-white/80 placeholder:font-bold text-white"
+              placeholder="search user"
+              onChange={(e) => {
+                setSearchName(e.target.value);
+              }}
+            />
+            <Button
+              disabled={searchName.trim().length == 0}
+              onClick={handleSearch}
+              className="px-4"
+            >
+              Search
+            </Button>
+          </div>
+          {users.length > 0 && (
+            <>
+              <Sidebar users={users} />
+            </>
+          )}
+
+          {searchedUsers.length > 0 && (
+            <>
+              <Sidebar users={searchedUsers} searched={true} />
+            </>
+          )}
+        </div>
+        <div className="flex justify-between px-3">
           <Button
-            disabled={searchName.trim().length == 0}
-            onClick={handleSearch}
-            className="px-4"
+            onClick={() => {
+              navigate("/dashboard");
+            }}
+            className="w-2/5"
           >
-            Search
+            Users
+          </Button>
+          <Button
+            onClick={() => {
+              navigate("/dashboard/global");
+            }}
+            className="w-2/5"
+          >
+            Global
           </Button>
         </div>
-        {users.length > 0 && (
-          <>
-            <Sidebar users={users} />
-          </>
-        )}
-
-        {searchedUsers.length > 0 && (
-          <>
-            <Sidebar users={searchedUsers} searched={true} />
-          </>
-        )}
       </div>
       <Outlet context={{ socket }} />
     </div>

@@ -143,6 +143,40 @@ export const sendMessage = async (req: Request, res: Response) => {
   });
 };
 
+export const sendGlobalMessage = async (req: Request, res: Response) => {
+  const { message } = req.body;
+  const senderId = req.id;
+
+  if (!message || message.trim() === "") {
+    res
+      .status(400)
+      .json({ status: "error", message: "message can't be empty " });
+    return;
+  }
+
+  const sentMessage = await Message.create({
+    sender: senderId,
+    receiver: null,
+    message,
+  });
+
+  if (!sentMessage) {
+    res.status(400).json({
+      status: "error",
+      message: "something went wrong",
+    });
+    return;
+  }
+
+  res.json({
+    status: "success",
+    message: "Message sent successfully",
+    data: {
+      sentMessage,
+    },
+  });
+};
+
 export const getMessages = async (req: Request, res: Response) => {
   const { otherUserId } = req.params;
   const userId = req.id;
@@ -182,6 +216,34 @@ export const getMessages = async (req: Request, res: Response) => {
   });
 };
 
+export const getGlobalMessages = async (req: Request, res: Response) => {
+  const messages = await Message.find({
+    receiver: null,
+  })
+    .populate("sender", "username _id")
+    .populate("receiver", "username _id");
+
+  if (messages.length === 0) {
+    res.json({
+      status: "success",
+      message: "No messages",
+      data: {
+        messages: [],
+        count: 0,
+      },
+    });
+    return;
+  }
+
+  res.json({
+    status: "success",
+    message: "Messages Retrieved Successfully",
+    data: {
+      messages,
+      count: messages.length,
+    },
+  });
+};
 export const markAllAsRead = async (req: Request, res: Response) => {
   const senderId = req.params.senderId;
   const userId = req.id;

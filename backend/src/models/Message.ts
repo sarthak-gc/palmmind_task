@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
-type MessageStatus = "Sent" | "Delivered" | "Read";
+type MessageStatus = "Sent" | "Read";
 export interface MessageI extends Document {
   sender: mongoose.Types.ObjectId;
   message: string;
@@ -23,11 +23,11 @@ const messageSchema = new Schema<MessageI>(
     receiver: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      // required: true, // not needed in case of global grp msg
     },
     status: {
       type: String,
-      enum: ["Sent", "Delivered", "Read"],
+      enum: ["Sent", "Read"],
       default: "Sent",
     },
     readAt: { type: Date, default: null },

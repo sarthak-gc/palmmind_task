@@ -16,7 +16,7 @@ export interface MessageI {
     username?: string;
   };
   message: string;
-  createdAt: Date;
+  createdAt?: Date;
 }
 
 export const Messages = () => {
@@ -41,6 +41,7 @@ export const Messages = () => {
   }, [otherUserId]);
 
   useEffect(() => {
+    socket.connect();
     socket.on("msg_sent", (data) => {
       const { message, senderId } = data;
 

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { axios } from "@/utils/axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -10,6 +10,10 @@ export const Signup = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,8 +27,9 @@ export const Signup = () => {
       }
 
       localStorage.setItem("userId", res.data.data?.user?.id);
+      localStorage.setItem("username", res.data.data?.user?.username);
       localStorage.setItem("token", res.data.data?.token);
-      navigate("/dashboard");
+      navigate("/dashboard/global");
     } catch (err) {
       console.error(err);
       // @ts-expect-error err

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { axios } from "@/utils/axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -10,6 +10,10 @@ export const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +28,9 @@ export const Login = () => {
       }
 
       localStorage.setItem("token", res.data.data.token);
+      localStorage.setItem("username", res.data.data?.user?.username);
       localStorage.setItem("userId", res.data.data.user.id);
-      navigate("/dashboard");
+      navigate("/dashboard/global");
     } catch (err) {
       // @ts-expect-error type unknown
       toast.error(err.response.data.message);

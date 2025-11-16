@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router";
 import { Messages } from "./components/Message.tsx";
 import { ProtectedRoute } from "./components/ProtectedRoutes.tsx";
 import { Dashboard } from "./pages/Dashboard.tsx";
+import GlobalChat from "./pages/GlobalChat.tsx";
 import { HomePage } from "./pages/HomePage.tsx";
 import { Login } from "./pages/Login.tsx";
 import { Signup } from "./pages/Signup.tsx";
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
       {
         path: ":otherUserId",
         element: <Messages />,
+      },
+      {
+        path: "global",
+        element: <GlobalChat />,
       },
     ],
   },

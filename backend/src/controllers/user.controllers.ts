@@ -98,10 +98,12 @@ export const searchUser = async (req: Request, res: Response) => {
   const users = await User.find({
     username: { $regex: username, $options: "i" },
   });
-  const updatedUsers = users.map((user) => ({
-    id: user._id,
-    username: user.username,
-  }));
+  const updatedUsers = users
+    .filter((user) => user._id != req.id)
+    .map((user) => ({
+      id: user._id,
+      username: user.username,
+    }));
 
   res.json({
     status: "success",
